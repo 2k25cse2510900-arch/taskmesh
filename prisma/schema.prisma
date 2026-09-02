@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+enum UserRole {
+  STUDENT
+  LEADER
+  ADMIN
+}
+
+enum SubmissionStatus {
+  PENDING
+  EVALUATED
+}
+
+enum SubmissionType {
+  TEXT
+  CODE
+  VIDEO_URL
+  IMAGE_URL
+  DOCUMENT_URL
+}
+
+enum EvaluationSource {
+  DEMO
+  AI
+}
+
+enum MembershipRole {
+  MEMBER
+  LEADER
+}
+
+model User {
+  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId            String?            @unique
+  email              String             @unique
+  name               String?
+  role               UserRole           @default(STUDENT)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  memberships        InitiativeMember[]
+  submissions        Submission[]
+  streaks            Streak[]
+  leaderboardEntries LeaderboardEntry[]
+}
+
+model Initiative {
+  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
+  name               String             @unique
+  description        String?
+  submissionType     String
+  taskType           String
+  evaluationRubric   Json?
+  scoringRules       Json?
+  schedule           Json?
+  rules              Json?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  members            InitiativeMember[]
+  tasks              Task[]
+  leaderboardEntries LeaderboardEntry[]
+  reports            Report[]
+  streaks            Streak[]
+}
+
+model InitiativeMember {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String         @db.ObjectId
+  initiativeId String         @db.ObjectId
+  role         MembershipRole @default(MEMBER)
+  joinedAt     DateTime       @default(now())
+  user         User           @relation(fields: [userId], references: [id])
+  initiative   Initiative     @relation(fields: [initiativeId], references: [id])
+
+  @@unique([userId, initiativeId])
+}
+
+model Task {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  initiativeId String       @db.ObjectId
+  title        String
+  description  String?
+  dueAt        DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  initiative   Initiative   @relation(fields: [initiativeId], references: [id])
+  submissions  Submission[]
+
+  @@unique([initiativeId, title])
+}
+
+model Submission {
+  id         String           @id @default(auto()) @map("_id") @db.ObjectId
+  taskId     String           @db.ObjectId
+  userId     String           @db.ObjectId
+  content    String?
+  mediaUrl   String?
+  type       SubmissionType   @default(TEXT)
+  status     SubmissionStatus @default(PENDING)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  task       Task             @relation(fields: [taskId], references: [id])
+  user       User             @relation(fields: [userId], references: [id])
+  evaluation Evaluation?
+
+  @@unique([taskId, userId])
+}
+
+model Evaluation {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  submissionId String           @unique @db.ObjectId
+  score        Float?
+  strengths    Json
+  weaknesses   Json
+  feedback     String
+  improvements Json
+  source       EvaluationSource @default(DEMO)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  submission   Submission       @relation(fields: [submissionId], references: [id])
+}
+
+model Streak {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String     @db.ObjectId
+  initiativeId String     @db.ObjectId
+  currentCount Int        @default(0)
+  updatedAt    DateTime   @updatedAt
+  user         User       @relation(fields: [userId], references: [id])
+  initiative   Initiative @relation(fields: [initiativeId], references: [id])
+
+  @@unique([userId, initiativeId])
+}
+
+model LeaderboardEntry {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String     @db.ObjectId
+  initiativeId String     @db.ObjectId
+  score        Float      @default(0)
+  rank         Int?
+  updatedAt    DateTime   @updatedAt
+  user         User       @relation(fields: [userId], references: [id])
+  initiative   Initiative @relation(fields: [initiativeId], references: [id])
+
+  @@unique([userId, initiativeId])
+}
+
+model Report {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  initiativeId String     @db.ObjectId
+  summary      String?
+  data         Json?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  initiative   Initiative @relation(fields: [initiativeId], references: [id])
+}
