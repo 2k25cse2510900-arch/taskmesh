@@ -96,18 +96,20 @@ model Task {
 }
 
 model Submission {
-  id         String           @id @default(auto()) @map("_id") @db.ObjectId
-  taskId     String           @db.ObjectId
-  userId     String           @db.ObjectId
-  content    String?
-  mediaUrl   String?
-  type       SubmissionType   @default(TEXT)
-  status     SubmissionStatus @default(PENDING)
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  task       Task             @relation(fields: [taskId], references: [id])
-  user       User             @relation(fields: [userId], references: [id])
-  evaluation Evaluation?
+  id                 String           @id @default(auto()) @map("_id") @db.ObjectId
+  taskId             String           @db.ObjectId
+  userId             String           @db.ObjectId
+  content            String?
+  mediaUrl           String?
+  transcript         String?
+  programmingLanguage String?
+  type               SubmissionType   @default(TEXT)
+  status             SubmissionStatus @default(PENDING)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  task               Task             @relation(fields: [taskId], references: [id])
+  user               User             @relation(fields: [userId], references: [id])
+  evaluation         Evaluation?
 
   @@unique([taskId, userId])
 }

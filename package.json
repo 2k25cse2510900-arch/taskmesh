@@ -12,10 +12,13 @@
   "dependencies": {
     "@clerk/backend": "^3.17.0",
     "@prisma/client": "^6.19.3",
+    "busboy": "^1.6.0",
     "dotenv": "^16.6.1",
+    "openai": "^7.23.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/busboy": "^1.5.4",
     "@types/node": "^22.20.1",
     "prisma": "^6.19.3",
     "tsx": "^4.20.6",
