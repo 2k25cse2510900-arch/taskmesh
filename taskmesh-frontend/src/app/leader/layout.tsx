@@ -7,5 +7,5 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
   const result = await requireRole(["LEADER", "ADMIN"]);
   if ("response" in result) redirect("/app");
 
-  return <AppShell role="leader" user={result.user}>{children}</AppShell>;
+  return <AppShell role="leader">{children}</AppShell>;
 }

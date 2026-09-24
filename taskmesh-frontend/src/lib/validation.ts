@@ -20,7 +20,6 @@ export const initiativeCreateSchema = z.object({
 export const submissionCreateSchema = z.object({
   taskId: z.string().min(1),
   content: z.string().trim().max(100000).optional(),
-  programmingLanguage: z.string().trim().min(1).max(40).optional(),
   url: z.string().url().optional(),
   media: z.array(z.object({
     publicId: z.string().min(1).max(255),

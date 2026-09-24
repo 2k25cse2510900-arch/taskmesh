@@ -23,7 +23,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
       update: { rubricId: rubric.id, status: "PROCESSING", errorCode: null, errorMessage: null, completedAt: null }
     });
     try {
-      const raw = await getEvaluationProvider().evaluate({ taskInstructions: submission.task.instructions ?? submission.task.description, initiativeContext: `${submission.task.initiative.title}: ${submission.task.initiative.objective}`, rubric: rubric.criteria, submission: { content: submission.content, transcript: submission.transcript, programmingLanguage: submission.programmingLanguage, url: submission.url } });
+      const raw = await getEvaluationProvider().evaluate({ taskInstructions: submission.task.instructions ?? submission.task.description, initiativeContext: `${submission.task.initiative.title}: ${submission.task.initiative.objective}`, rubric: rubric.criteria, submission: { content: submission.content, url: submission.url } });
       const parsed = evaluationResultSchema.parse(raw);
       if (parsed.criterionScores.some((item) => !criterionById.has(item.criterionId) || item.score > (criterionById.get(item.criterionId)?.maxScore ?? 0))) {
         throw new Error("Provider returned an invalid rubric criterion score");

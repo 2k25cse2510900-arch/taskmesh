@@ -52,10 +52,10 @@ export const initiatives: Initiative[] = [
   },
   {
     id: "speaking-club",
-    title: "English Initiative",
-    description: "Short English writing prompts with clear, actionable feedback.",
-    category: "English",
-    skill: "Written English",
+    title: "Communication Challenge",
+    description: "Short speaking prompts, voice uploads, rubric-based scoring, and peer practice.",
+    category: "Communication",
+    skill: "Public Speaking",
     duration: "21 days",
     taskFrequency: "Daily",
     difficulty: "Hard",
@@ -67,10 +67,10 @@ export const initiatives: Initiative[] = [
     color: "from-green-500/20 to-emerald-200/20",
     accent: "text-green-600",
     stage: "Growing",
-    privacy: "Public",
+    privacy: "Private",
     streakLeader: "Rahul",
     owner: "SpeakUp Circle",
-    goal: "Write with clarity and confidence"
+    goal: "Speak with clarity under pressure"
   },
   {
     id: "fitness-streak",
@@ -135,17 +135,17 @@ export const todayTask: Task = {
 export const activeTasks: Task[] = [
   todayTask,
   {
-    id: "task-english-1",
+    id: "task-voice-1",
     initiativeId: "speaking-club",
-    title: "English writing practice",
-    description: "Record a short English response about a recent learning experience, then review its transcript.",
+    title: "60-second self-introduction",
+    description: "Record a confident intro and focus on pace, tone, and structure.",
     due: "Tomorrow, 8:00 AM",
     dueLabel: "Due tomorrow",
     difficulty: "Easy",
     progress: 34,
-    status: "In progress",
-    submissionType: ["video"],
-    rubric: ["Grammar", "Wording", "Punctuation", "Clarity"]
+    status: "Submitted",
+    submissionType: ["audio", "video"],
+    rubric: ["Clarity", "Confidence", "Pacing", "Vocabulary"]
   },
   {
     id: "task-aptitude-1",

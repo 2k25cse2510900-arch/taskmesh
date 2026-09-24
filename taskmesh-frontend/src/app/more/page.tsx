@@ -1,0 +1,4 @@
+import { MorePage } from "@/features/initiatives";
+import { MarketingShell } from "@/components/layout/shells";
+
+export default function Page() { return <MarketingShell><MorePage /></MarketingShell>; }

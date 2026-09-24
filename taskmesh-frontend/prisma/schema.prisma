@@ -186,8 +186,6 @@ model Submission {
   version     Int               @default(1)
   status      SubmissionStatus  @default(DRAFT)
   content     String?
-  transcript  String?
-  programmingLanguage String?
   url         String?
   submittedAt DateTime?
   createdAt   DateTime          @default(now())

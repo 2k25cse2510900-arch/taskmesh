@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { UserButton } from "@clerk/nextjs";
-import { ArrowRight, Bell, BookOpen, CalendarDays, ChevronRight, LayoutGrid, ShieldCheck, Sparkles, Target, Users } from "lucide-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { ArrowRight, Bell, BookOpen, CalendarDays, ChevronRight, LayoutGrid, Menu, ShieldCheck, Sparkles, Target, Users, X } from "lucide-react";
 import { Avatar, Badge, Button, NavLink } from "@/components/ui";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
-import { initiatives } from "@/mock";
 
 const studentNav = [
   { href: "/app/dashboard", label: "Dashboard", icon: <LayoutGrid className="h-4 w-4" /> },
@@ -28,7 +28,7 @@ const leaderNav = [
 
 export function TopBrand() {
   return (
-    <Link href="/" className="flex items-center gap-3">
+    <Link href="/" className="flex min-w-0 items-center gap-3">
       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-soft">
         <span className="text-base font-bold">T</span>
       </div>
@@ -41,48 +41,46 @@ export function TopBrand() {
 }
 
 export function MarketingShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const links = [
+    { href: "/", label: "Home" },
+    { href: "/english", label: "English" },
+    { href: "/dsa", label: "DSA" },
+    { href: "/more", label: "More" },
+    { href: "/about", label: "About us" }
+  ];
+
   return (
-    <div className="min-h-screen bg-[var(--background)] text-slate-950">
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/82 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+    <div className="marketing-shell flex min-h-screen flex-col bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+      <header className="marketing-header sticky top-0 z-40 border-b backdrop-blur">
+        <div className="page-container flex min-h-[4.75rem] items-center justify-between gap-4">
           <TopBrand />
-          <nav className="hidden items-center gap-2 md:flex">
-            <a href="#features" className="rounded-full px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">Features</a>
-            <a href="#how" className="rounded-full px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">How it works</a>
-            <a href="#initiatives" className="rounded-full px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">Initiatives</a>
-            <a href="#insights" className="rounded-full px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">Insights</a>
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
+            {links.map((link) => <Link key={link.href} href={link.href} aria-current={pathname === link.href ? "page" : undefined} className="marketing-nav-link">{link.label}</Link>)}
           </nav>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" asChild>
-              <Link href="/sign-in">Sign in</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/app/dashboard">
-                Explore TaskMesh
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <ThemeToggle />
+            <SignedOut><Button className="hidden sm:inline-flex" variant="ghost" asChild><Link href="/sign-in">Sign in</Link></Button><Button className="hidden md:inline-flex" asChild><Link href="/sign-in">Get started <ArrowRight className="h-4 w-4" /></Link></Button></SignedOut>
+            <SignedIn><Button className="hidden sm:inline-flex" variant="ghost" asChild><Link href="/app/dashboard">Open workspace</Link></Button><UserButton /></SignedIn>
+            <button className="mobile-menu-button md:hidden" type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-controls="mobile-public-navigation" aria-label="Toggle navigation">
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+        {menuOpen ? <nav id="mobile-public-navigation" className="mobile-public-nav md:hidden" aria-label="Mobile primary navigation">{links.map((link) => <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} aria-current={pathname === link.href ? "page" : undefined}>{link.label}</Link>)}<SignedOut><Link href="/sign-in" onClick={() => setMenuOpen(false)}>Sign in <ArrowRight className="h-4 w-4" /></Link></SignedOut><SignedIn><Link href="/app/dashboard" onClick={() => setMenuOpen(false)}>Open workspace <ArrowRight className="h-4 w-4" /></Link></SignedIn></nav> : null}
       </header>
-      {children}
+      <div className="flex-1">{children}</div>
+      <footer className="marketing-footer border-t"><div className="page-container flex flex-col gap-2 py-6 text-sm sm:flex-row sm:items-center sm:justify-between"><span>© {new Date().getFullYear()} TaskMesh</span><span>Structured practice for steady growth.</span></div></footer>
     </div>
   );
 }
 
-type AuthenticatedProfile = {
-  name: string | null;
-  email: string | null;
-  avatarUrl: string | null;
-  role: "PARTICIPANT" | "LEADER" | "ADMIN";
-};
-
-export function AppShell({ children, role = "student", user }: { children: ReactNode; role?: "student" | "leader"; user: AuthenticatedProfile }) {
+export function AppShell({ children, role = "student" }: { children: ReactNode; role?: "student" | "leader" }) {
   const pathname = usePathname();
   const [commandOpen, setCommandOpen] = useState(false);
   const nav = role === "leader" ? leaderNav : studentNav;
-  const profileName = user.name ?? user.email ?? "TaskMesh member";
-  const profileDescription = user.email ?? `${user.role.toLowerCase()} workspace`;
+  const profile = role === "leader" ? { name: "Leader workspace", subtitle: "Manage initiative operations when data is available." } : { name: "Participant workspace", subtitle: "Build a steady practice rhythm." };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -105,11 +103,11 @@ export function AppShell({ children, role = "student", user }: { children: React
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-white/60">{role === "leader" ? "Leader view" : "Student view"}</p>
-                <p className="mt-2 text-lg font-semibold">{profileName}</p>
+                <p className="mt-2 text-lg font-semibold">{profile.name}</p>
               </div>
-              <Avatar name={profileName} className="bg-white text-slate-950" />
+              <Avatar name={profile.name} className="bg-white text-slate-950" />
             </div>
-            <p className="mt-3 text-sm leading-6 text-white/72">{profileDescription}</p>
+              <p className="mt-3 text-sm leading-6 text-white/72">{profile.subtitle}</p>
           </div>
           <div className="mt-5 space-y-1">
             {nav.map((item) => (
@@ -134,22 +132,7 @@ export function AppShell({ children, role = "student", user }: { children: React
               </Button>
             </div>
           </div>
-          <div className="mt-auto pt-6">
-            <div className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Focus summary</p>
-              <div className="mt-3 space-y-3">
-                {initiatives.slice(0, 2).map((initiative) => (
-                  <div key={initiative.id} className="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2.5">
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{initiative.title}</p>
-                      <p className="text-xs text-slate-500">{initiative.skill}</p>
-                    </div>
-                    <span className="text-sm font-semibold text-slate-900">{initiative.completionRate}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <div className="mt-auto pt-6"><div className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs uppercase tracking-[0.2em] text-slate-500">Core initiatives</p><Link className="mt-3 block text-sm font-medium text-slate-900" href="/english">English →</Link><Link className="mt-2 block text-sm font-medium text-slate-900" href="/dsa">DSA →</Link></div></div>
         </aside>
 
         <main className="min-w-0 flex-1">
@@ -172,7 +155,7 @@ export function AppShell({ children, role = "student", user }: { children: React
               <div className="flex items-center gap-2">
                 <Badge tone="green">Workspace ready</Badge>
                 <Button variant="outline" className="hidden sm:inline-flex">Invite</Button>
-                <UserButton afterSignOutUrl="/sign-in" />
+                <Avatar name={profile.name} />
               </div>
             </div>
           </div>

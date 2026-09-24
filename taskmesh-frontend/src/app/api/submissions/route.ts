@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     if (!task) return NextResponse.json({ error: "Task is unavailable or you are not a member" }, { status: 403 });
     const latest = await prisma.submission.findFirst({ where: { taskId: data.taskId, userId: result.user.id }, orderBy: { version: "desc" }, select: { version: true } });
     const submission = await prisma.$transaction(async (tx) => {
-      const created = await tx.submission.create({ data: { taskId: data.taskId, userId: result.user.id, version: (latest?.version ?? 0) + 1, content: data.content, programmingLanguage: data.programmingLanguage, url: data.url, status: "SUBMITTED", submittedAt: new Date(), media: { create: data.media } }, include: { media: true } });
+      const created = await tx.submission.create({ data: { taskId: data.taskId, userId: result.user.id, version: (latest?.version ?? 0) + 1, content: data.content, url: data.url, status: "SUBMITTED", submittedAt: new Date(), media: { create: data.media } }, include: { media: true } });
       await tx.auditEvent.create({ data: { actorId: result.user.id, action: "SUBMISSION_CREATED", entityType: "Submission", entityId: created.id } });
       return created;
     });
